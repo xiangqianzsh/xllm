@@ -237,6 +237,7 @@ XLLM_CAPI_EXPORT bool xllm_rec_initialize_with_devices(
             xllm_init_options.enable_xattention_one_stage)
         .rec_worker_max_concurrency(
             xllm_init_options.rec_worker_max_concurrency);
+    xllm::apply_onerec_async_perf_env_overrides();
     if (xllm_init_options.request_queue_size > 0) {
       xllm::RecConfig::get_instance().request_queue_size(
           xllm_init_options.request_queue_size);

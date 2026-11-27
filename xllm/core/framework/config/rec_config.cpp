@@ -15,6 +15,10 @@ limitations under the License.
 
 #include "core/framework/config/rec_config.h"
 
+#include <glog/logging.h>
+
+#include <cstdlib>
+
 #include "core/common/global_flags.h"
 #include "core/framework/config/config_utils.h"
 
@@ -90,7 +94,9 @@ DEFINE_bool(enable_multistream_perf_mode,
             "Enable OneRec multistream execution optimizations.");
 DEFINE_bool(enable_onerec_async_perf,
             false,
-            "Defer OneRec stream synchronization until output consumption.");
+            "Defer OneRec stream synchronization until output consumption, and "
+            "let the REC beam search and cache select kernels reuse a "
+            "persistent workspace without a per-call stream sync.");
 DEFINE_bool(enable_onerec_multistream_core_split,
             false,
             "Assign core quotas to concurrent OneRec streams.");
@@ -200,6 +206,19 @@ void RecConfig::initialize() {
   if (const auto& json_config = config::get_parsed_json_config()) {
     from_json(*json_config);
   }
+}
+
+void apply_onerec_async_perf_env_overrides() {
+  if (!RecConfig::get_instance().enable_onerec_async_perf()) {
+    return;
+  }
+
+  // The OneRec kernels read these once at first use. A failed export would
+  // silently leave them on the synchronous path.
+  PCHECK(setenv("XLLM_ONEREC_XATTN_ASYNC_BEAM_SEARCH", "1", 1) == 0)
+      << "Failed to enable async OneRec beam search";
+  PCHECK(setenv("XLLM_ONEREC_XATTN_ASYNC_CACHE_SELECT", "1", 1) == 0)
+      << "Failed to enable async OneRec cache select";
 }
 
 }  // namespace xllm

@@ -101,4 +101,9 @@ class RecConfig final {
   PROPERTY(std::string, constrained_decoding_filter_path) = "";
 };
 
+// Export enable_onerec_async_perf to the OneRec NPU kernels. The kernels read
+// the environment once, so call it after RecConfig is initialized and before
+// the first REC execution.
+void apply_onerec_async_perf_env_overrides();
+
 }  // namespace xllm

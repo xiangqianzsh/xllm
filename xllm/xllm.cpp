@@ -86,6 +86,7 @@ void initialize_configs() {
   ParallelConfig::get_instance().initialize();
   ProfileConfig::get_instance().initialize();
   RecConfig::get_instance().initialize();
+  xllm::apply_onerec_async_perf_env_overrides();
   SchedulerConfig::get_instance().initialize();
   ServiceConfig::get_instance().initialize();
   SpeculativeConfig::get_instance().initialize();
